@@ -1,4 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.Design;
+using ConsoleUI;
+using GameEngine;
+using MenuSystem;
 
 namespace ConsoleApp
 {
@@ -7,108 +12,119 @@ namespace ConsoleApp
         static void Main(string[] args)
         {
             Console.WriteLine("Hello Game!");
-            MenuMain();
+            
+            var Menu2 = new Menu(2)
+            {
+                Title = "Menu 2",
+                MenuItems = new List<MenuItem>()
+                {
+                    new MenuItem()
+                    {
+                        Command = "C",
+                        Title = "item C",
+                        CommandToExecute = null
+                    }
+                }
+            };
+            
+            var Menu1 = new Menu(1)
+            {
+                Title = "Menu 1",
+                MenuItems = new List<MenuItem>()
+                {
+                    new MenuItem()
+                    {
+                        Command = "C",
+                        Title = "Go to level 2",
+                        CommandToExecute = Menu2.Run
+                    }
+                }
+            };
+
+            var gameMenu = new Menu()
+            {
+                Title = "Start a new game of Tic-Tac-Toe",
+                MenuItems = new List<MenuItem>()
+                {
+                    new MenuItem()
+                    {
+                        Command = "1",
+                        Title = "Computer starts",
+                        CommandToExecute = TestGame
+                    },
+                    new MenuItem()
+                    {
+                        Command = "2",
+                        Title = "Human starts",
+                        CommandToExecute = null
+                    },
+                    new MenuItem()
+                    {
+                        Command = "3",
+                        Title = "Human against Human",
+                        CommandToExecute = null
+                    }
+                }
+            };
+
+            var Menu0 = new Menu()
+            {
+                Title = "Tic Tac Toe Main Menu",
+                MenuItems = new List<MenuItem>()
+                {
+                    new MenuItem()
+                    {
+                        Command = "S",
+                        Title = "Start game",
+                        CommandToExecute = gameMenu.Run
+                    }
+                }
+            };
+
+            Menu0.Run();
         }
 
-        static void MenuMain()
+        static string TestGame()
         {
-            var command = "";
+            var game = new Game(7, 7);
+            var done = false;
             do
             {
-                Console.WriteLine("Main menu");
-                Console.WriteLine("====================");
-                Console.WriteLine("A New Game");
-                Console.WriteLine("O Options");
-                Console.WriteLine("X Exit");
+                Console.Clear();
+                GameUI.PrintBoard(game);
+                var userXInt = -1;
+                var userYInt = -1;
+                do
+                {
+                    Console.WriteLine("Give me Y value!");
+                    Console.Write(">");
+                    var userY = Console.ReadLine();
+                    if (!int.TryParse(userY, out userYInt))
+                    {
+                        Console.WriteLine($"{userY} is not a number");
+
+                    }
+                } while (userYInt < 0);
                 
-                Console.WriteLine("----------");
-                Console.Write(">");
-
-                // If left side equals null, return ""
-                command = Console.ReadLine()?.Trim().ToUpper() ?? "";
-
-                switch (command)
+                do
                 {
-                    case "A":
-                        command = MenuGame();
-                        break;
-                    case "O":
-                        Console.WriteLine("O was selected");
-                        break;
-                    case "":
-                        Console.WriteLine("Please choose an action");
-                        break;
-                    case "X":
-                        break;
-                    default:
-                        Console.WriteLine("Unknown command!");
-                        break;
-                }
+                    Console.WriteLine("Give me X value!");
+                    Console.Write(">");
+                    var userX = Console.ReadLine();
+                    if (!int.TryParse(userX, out userXInt))
+                    {
+                        Console.WriteLine($"{userX} is not a number");
 
-                if (command != "X")
-                {
-                    Console.WriteLine("Press any key to continue!");
-                    Console.WriteLine();
-
-                    Console.Clear();          
-                }
-
-
-            } while (command != "X");
-
-            Console.WriteLine();
-            Console.WriteLine("Good bye!");        
-        }
-
-        static String MenuGame()
-        {
-            var command = "";
-            do
-            {
-                Console.WriteLine("Game menu");
-                Console.WriteLine("====================");
-                Console.WriteLine("A Game 1");
-                Console.WriteLine("B Game 2");
-                Console.WriteLine("R return to previous");
-                Console.WriteLine("X Exit");
+                    }
+                } while (userXInt < 0);
                 
-                Console.WriteLine("----------");
-                Console.Write(">");
+                game.Move(userYInt, userXInt);
 
-                // If left side equals null, return ""
-                command = Console.ReadLine()?.Trim().ToUpper() ?? "";
+                done = userYInt == 0 &&
+                       userXInt == 0;
 
-                switch (command)
-                {
-                    case "A":
-                        Console.WriteLine("A was selected");
-                        break;
-                    case "B":
-                        Console.WriteLine("B was selected");
-                        break;
-                    case "":
-                        Console.WriteLine("Please choose an action");
-                        break;
-                    case "X":
-                    case "R":
-                        break;
-                    default:
-                        Console.WriteLine("Unknown command!");
-                        break;
-                }
-
-                if (command != "X" && command != "R")
-                {
-                    Console.WriteLine("Press any key to continue!");
-                    Console.WriteLine();
-
-                    Console.Clear();          
-                }
-
-
-            } while (command != "X" && command != "R");
-
-            return command;
+            } while (!done);
+            return "GAME OVER!";
         }
     }
 }
