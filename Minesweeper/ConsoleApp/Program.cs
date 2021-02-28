@@ -11,49 +11,17 @@ namespace ConsoleApp
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello Game!");
-
-            var gameMenu = new Menu(1)
-            {
-                Title = "Start a new game of Tic-Tac-Toe",
-                MenuItemsDictionary = new Dictionary<string, MenuItem>()
-                {
-                    {
-                        "1",
-                        new MenuItem()
-                        {
-                            Title = "Computer starts",
-                            CommandToExecute = TestGame
-                        }
-                    },
-                    {
-                        "2",
-                        new MenuItem()
-                        {
-                            Title = "Human starts",
-                            CommandToExecute = null
-                        }
-                    },
-                    {
-                        "3",
-                        new MenuItem()
-                        {
-                            Title = "Human against Human",
-                            CommandToExecute = null
-                        }
-                    }
-                }
-            };
+            Console.WriteLine("Minesweeper");
 
             var Menu0 = new Menu()
             {
-                Title = "Tic Tac Toe Main Menu",
+                Title = "Minesweeper Main Menu",
                 MenuItemsDictionary = new Dictionary<string, MenuItem>()
                 { 
                     {"S", new MenuItem()
                         {
                             Title = "Start game",
-                            CommandToExecute = gameMenu.Run
+                            CommandToExecute = GameLoop 
                         }
                     }
                 }
@@ -62,9 +30,9 @@ namespace ConsoleApp
             Menu0.Run();
         }
 
-        static string TestGame()
+        static string GameLoop()
         {
-            var game = new Game(7, 7);
+            var game = new Game();
             var done = false;
             do
             {
@@ -96,8 +64,6 @@ namespace ConsoleApp
                     }
                 } while (userXInt < 0);
                 
-                game.Move(userYInt, userXInt);
-
                 done = userYInt == 0 &&
                        userXInt == 0;
 
