@@ -4,24 +4,26 @@ namespace GameEngine
 {
     public class Cell
     {
-        private Boolean _isOpened;
         private bool _hasBomb;
 
-        public Boolean HasBomb
+        public bool HasBomb
         {
             get => _hasBomb;
             set
             {
-                if (!_isOpened)
+                if (!IsOpened)
                 {
                     _hasBomb = value;
                 }
             }
         }
+        public bool IsOpened { get; set; }
+
+        public bool IsMarked { get; set; }
 
         public Cell()
         {
-            _isOpened = false;
+            IsOpened = false;
             _hasBomb = false;
         }
     }

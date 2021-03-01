@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Dynamic;
 using System.Linq;
 
 namespace GameEngine
@@ -7,16 +8,17 @@ namespace GameEngine
     {
         private Cell[,] Board { get; set; }
 
-        private int _numberOfMines;
+        private readonly int _numberOfMines;
         private GameStatus _gameStatus;
         public int BoardWidth { get; }
         public int BoardHeight { get; }
 
-        public Game() : this(Difficulty.Easy)
+        public GameStatus GameStatus
         {
+            get => _gameStatus;
         }
 
-        public Game(Difficulty difficulty)
+        public Game(Difficulty difficulty = Difficulty.Easy)
         {
             switch (difficulty)
             {
@@ -54,30 +56,72 @@ namespace GameEngine
                 }
             }
             
-        }
-
-        private int GetCellLocation(int cellY, int cellX)
-        {
-            return cellY * BoardWidth + cellX;
-        }
-
-        private int[] GenerateMineLocations()
-        {
-            Random rnd = new Random();
-            int[] mineLocations = new int[_numberOfMines];
-            for (int i = 0; i < _numberOfMines; i++)
+            int GetCellLocation(int cellY, int cellX)
             {
-                mineLocations[i] = rnd.Next(0, BoardHeight * BoardWidth - 1);
+                return cellY * BoardWidth + cellX;
             }
+            
+            int[] GenerateMineLocations()
+            {
+                Random rnd = new Random();
+                int[] mineLocations = new int[_numberOfMines];
+                for (var i = 0; i < _numberOfMines; i++)
+                {
+                    mineLocations[i] = rnd.Next(0, BoardHeight * BoardWidth - 1);
+                }
 
-            return mineLocations;
+                return mineLocations;
+            }
         }
-
+        
         public Cell[,] GetBoard()
         {
             var result = new Cell[BoardHeight, BoardWidth];
             Array.Copy(Board, result, Board.Length);
             return result;
+        }
+        
+        public static int GetNumberOfBombsNearCell(Cell[,] board, int yIndex, int xIndex) {
+            var numberOfBombsNearby = 0;
+            numberOfBombsNearby += board[yIndex - 1, xIndex - 1].HasBomb ? 1 : 0;
+            numberOfBombsNearby += board[yIndex - 1, xIndex ].HasBomb ? 1 : 0;
+            numberOfBombsNearby += board[yIndex - 1, xIndex + 1].HasBomb ? 1 : 0;
+            numberOfBombsNearby += board[yIndex, xIndex - 1].HasBomb ? 1 : 0;
+            numberOfBombsNearby += board[yIndex, xIndex + 1].HasBomb ? 1 : 0;
+            numberOfBombsNearby += board[yIndex + 1, xIndex - 1].HasBomb ? 1 : 0;
+            numberOfBombsNearby += board[yIndex + 1, xIndex].HasBomb ? 1 : 0;
+            numberOfBombsNearby += board[yIndex + 1, xIndex + 1].HasBomb ? 1 : 0;
+            return numberOfBombsNearby;
+        }
+
+        public void OpenCell(int yIndex, int xIndex)
+        {
+            Cell cell = Board[yIndex, xIndex];
+            cell.IsOpened = true;
+            
+            if (cell.HasBomb)
+            {
+                _gameStatus = GameStatus.Lost;
+                return;
+            }
+
+            if (GetNumberOfBombsNearCell(Board, yIndex, xIndex) == 0)
+            {
+                OpenCell(yIndex - 1, xIndex - 1);
+                OpenCell(yIndex - 1, xIndex);
+                OpenCell(yIndex - 1, xIndex + 1);
+                OpenCell(yIndex, xIndex - 1);
+                OpenCell(yIndex, xIndex + 1);
+                OpenCell(yIndex + 1, xIndex - 1);
+                OpenCell(yIndex + 1, xIndex);
+                OpenCell(yIndex + 1, xIndex + 1);
+            }
+        }
+
+        public void MarkCell(int yIndex, int xIndex)
+        {
+            Cell cell = Board[yIndex, xIndex];
+            cell.IsMarked = true;
         }
     }
 }
