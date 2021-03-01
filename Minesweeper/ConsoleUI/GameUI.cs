@@ -58,6 +58,11 @@ namespace ConsoleUI
 
         private static string PrintCellState(Game game, int yIndex, int xIndex)
         {
+            if (game.GameStatus == GameStatus.NotStarted)
+            {
+                return "·";
+            }
+            
             var board = game.GetBoard();
             var cell = board[yIndex, xIndex];
             
@@ -68,10 +73,10 @@ namespace ConsoleUI
 
             if (cell.HasBomb)
             {
-                return "💣";
+                return "B";
             }
 
-            var numberOfBombsNearby = Game.GetNumberOfBombsNearCell(board, yIndex, xIndex);
+            var numberOfBombsNearby = game.GetNumberOfBombsNearCell(yIndex, xIndex);
             
             return numberOfBombsNearby != 0 ? numberOfBombsNearby.ToString() : " ";
         }

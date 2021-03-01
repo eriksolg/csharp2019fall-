@@ -46,7 +46,7 @@ namespace ConsoleApp
                     },
                     {"2", new MenuItem()
                         {
-                            Title = "Mark",
+                            Title = "Mark/Unmark",
                             CommandToExecute = () => "2"
                         }
                     }
@@ -69,9 +69,13 @@ namespace ConsoleApp
                     if (!int.TryParse(userY, out userYInt))
                     {
                         Console.WriteLine($"{userY} is not a number");
-
+                        continue;
                     }
-                } while (userYInt < 0);
+                    if (userYInt >= game.BoardHeight)
+                    {
+                        Console.WriteLine("Y coordinate out of board bounds!");
+                    }
+                } while (userYInt < 0 || userYInt >= game.BoardHeight);
                 
                 do
                 {
@@ -81,8 +85,13 @@ namespace ConsoleApp
                     if (!int.TryParse(userX, out userXInt))
                     {
                         Console.WriteLine($"{userX} is not a number");
+                        continue;
                     }
-                } while (userXInt < 0);
+                    if (userXInt >= game.BoardWidth)
+                    {
+                        Console.WriteLine("X coordinate out of board bounds!");
+                    }
+                } while (userXInt < 0 || userXInt >= game.BoardWidth);
                 
                 do
                 {
@@ -103,7 +112,17 @@ namespace ConsoleApp
                         break;
                 }
 
-            } while (true);
+            } while (game.GameStatus == GameStatus.InProgress);
+
+            game.OpenAllCells();
+            Console.Clear();
+            GameUI.PrintBoard(game);
+            if (game.GameStatus == GameStatus.Lost)
+            {
+                Console.WriteLine("Game Lost!");
+            }
+
+            return "X";
         }
     }
 }
