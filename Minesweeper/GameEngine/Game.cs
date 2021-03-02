@@ -108,12 +108,6 @@ namespace GameEngine
             }
             Cell cell = Board[yIndex, xIndex];
             cell.IsOpened = true;
-            
-            if (cell.HasBomb)
-            {
-                _gameStatus = GameStatus.Lost;
-                return;
-            }
 
             if (GetNumberOfBombsNearCell( yIndex, xIndex) == 0)
             {
@@ -148,6 +142,39 @@ namespace GameEngine
             
             Cell cell = Board[yIndex, xIndex];
             cell.IsMarked = !cell.IsMarked;
+        }
+
+        public void UpdateGameStatus()
+        {
+            // Game over, nothing to update
+            if (GameStatus == GameStatus.Lost ||
+                GameStatus == GameStatus.Won)
+            {
+                return;
+            }
+
+            GameStatus currentGameStatus = GameStatus.Won;
+            
+            for (var y = 0; y < BoardHeight; y++)
+            {
+                for (var x = 0; x < BoardWidth; x++)
+                {
+                    Cell cell = Board[y, x];
+                    if (cell.HasBomb && cell.IsOpened)
+                    {
+                        currentGameStatus = GameStatus.Lost;
+                    }
+                    
+                    if ((cell.HasBomb && !cell.IsMarked ||
+                        !cell.HasBomb && !cell.IsOpened ) &&
+                        currentGameStatus != GameStatus.Lost)
+                    {
+                        currentGameStatus = GameStatus.InProgress;
+                    }
+                }
+            }
+
+            _gameStatus = currentGameStatus;
         }
         
         private List<(int, int)> GetNeighbours(int yIndex, int xIndex)

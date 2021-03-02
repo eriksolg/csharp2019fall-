@@ -13,6 +13,32 @@ namespace ConsoleApp
         {
             Console.WriteLine("Minesweeper");
 
+            var MenuStartGame = new Menu()
+            {
+                Title = "Select Difficulty",
+                MenuItemsDictionary = new Dictionary<string, MenuItem>()
+                { 
+                    {"1", new MenuItem()
+                        {
+                            Title = "Easy",
+                            CommandToExecute = () => GameLoop(Difficulty.Easy)
+                        }
+                    },
+                    {"2", new MenuItem()
+                        {
+                            Title = "Medium",
+                            CommandToExecute = () => GameLoop(Difficulty.Medium) 
+                        }
+                    },
+                    {"3", new MenuItem()
+                        {
+                            Title = "Hard",
+                            CommandToExecute = () => GameLoop(Difficulty.Hard) 
+                        }
+                    }
+                }
+            };
+            
             var Menu0 = new Menu()
             {
                 Title = "Minesweeper Main Menu",
@@ -21,7 +47,7 @@ namespace ConsoleApp
                     {"S", new MenuItem()
                         {
                             Title = "Start game",
-                            CommandToExecute = GameLoop 
+                            CommandToExecute = MenuStartGame.Run 
                         }
                     }
                 }
@@ -30,7 +56,7 @@ namespace ConsoleApp
             Menu0.Run();
         }
 
-        private static string GameLoop()
+        private static string GameLoop(Difficulty difficulty)
         {
             
             var ActionMenu = new Menu()
@@ -53,7 +79,7 @@ namespace ConsoleApp
                 }
             };
             
-            var game = new Game();
+            var game = new Game(difficulty);
             do
             {
                 Console.Clear();
@@ -69,7 +95,7 @@ namespace ConsoleApp
                     if (!int.TryParse(userY, out userYInt))
                     {
                         Console.WriteLine($"{userY} is not a number");
-                        continue;
+                        userYInt = -1;
                     }
                     if (userYInt >= game.BoardHeight)
                     {
@@ -85,7 +111,7 @@ namespace ConsoleApp
                     if (!int.TryParse(userX, out userXInt))
                     {
                         Console.WriteLine($"{userX} is not a number");
-                        continue;
+                        userXInt = -1;
                     }
                     if (userXInt >= game.BoardWidth)
                     {
@@ -112,14 +138,22 @@ namespace ConsoleApp
                         break;
                 }
 
+                game.UpdateGameStatus();
+
             } while (game.GameStatus == GameStatus.InProgress);
 
             game.OpenAllCells();
             Console.Clear();
             GameUI.PrintBoard(game);
-            if (game.GameStatus == GameStatus.Lost)
+
+            switch (game.GameStatus)
             {
-                Console.WriteLine("Game Lost!");
+                case GameStatus.Lost:
+                    Console.WriteLine("Game Lost!");
+                    break;
+                case GameStatus.Won:
+                    Console.WriteLine("Game Won!");
+                    break;
             }
 
             return "X";
