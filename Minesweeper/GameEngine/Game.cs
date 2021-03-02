@@ -7,17 +7,12 @@ namespace GameEngine
 {
     public class Game
     {
-        private Cell[,] Board { get; set; }
+        private Cell[,] Board { get; }
 
         private readonly int _numberOfMines;
-        private GameStatus _gameStatus;
         public int BoardWidth { get; }
         public int BoardHeight { get; }
-
-        public GameStatus GameStatus
-        {
-            get => _gameStatus;
-        }
+        public GameStatus GameStatus { get; private set; }
 
         public Game(Difficulty difficulty = Difficulty.Easy)
         {
@@ -37,13 +32,19 @@ namespace GameEngine
                     _numberOfMines = 99;
                     break;
             }
+
             Board = new Cell[BoardHeight, BoardWidth];
-            _gameStatus = GameStatus.NotStarted;
+            GameStatus = GameStatus.NotStarted;
+        }
+
+        public void HandleFirstMove(int firstMoveY, int firstMoveX)
+        {
+            GameStatus = GameStatus.InProgress;
+            InitializeBoard(firstMoveY, firstMoveX);
         }
 
         private void InitializeBoard(int firstMoveY, int firstMoveX)
         {
-            _gameStatus = GameStatus.InProgress;
             
             var mineLocations = GenerateMineLocations();
             for (var y = 0; y < BoardHeight; y++)
@@ -51,30 +52,27 @@ namespace GameEngine
                 for (var x = 0; x < BoardWidth; x++)
                 {
                     Board[y, x] = new Cell();
-                    if (mineLocations.Contains(GetCellLocation(y, x)))
+                    if (mineLocations.Contains((y, x)))
                     {
                         Board[y, x].HasBomb = true;
                     }
                 }
             }
-            
-            int GetCellLocation(int cellY, int cellX)
-            {
-                return cellY * BoardWidth + cellX;
-            }
-            
-            int[] GenerateMineLocations()
+
+            (int, int)[] GenerateMineLocations()
             {
                 Random rnd = new Random();
-                int[] mineLocations = new int[_numberOfMines];
+                (int, int)[] mineLocations = new (int, int)[_numberOfMines];
                 for (var i = 0; i < _numberOfMines; i++)
                 {
-                    int generatedLocation;
-                    
+                    (int, int) generatedLocation;
                     do
                     {
-                        generatedLocation = rnd.Next(0, BoardHeight * BoardWidth - 1);
-                    } while (generatedLocation == GetCellLocation(firstMoveY, firstMoveX));
+                        int generatedNumber = rnd.Next(0, BoardHeight * BoardWidth - 1);
+                        int x = generatedNumber % BoardWidth;
+                        int y = (generatedNumber - x) / BoardWidth;
+                        generatedLocation = (y, x);
+                    } while (generatedLocation == (firstMoveY, firstMoveX));
                     
                     mineLocations[i] = generatedLocation;
                 }
@@ -102,7 +100,7 @@ namespace GameEngine
 
         public void OpenCell(int yIndex, int xIndex)
         {
-            if (_gameStatus == GameStatus.NotStarted)
+            if (GameStatus == GameStatus.NotStarted)
             {
                 InitializeBoard(yIndex, xIndex);
             }
@@ -135,7 +133,7 @@ namespace GameEngine
 
         public void MarkCell(int yIndex, int xIndex)
         {
-            if (_gameStatus == GameStatus.NotStarted)
+            if (GameStatus == GameStatus.NotStarted)
             {
                 InitializeBoard(yIndex, xIndex);
             }
@@ -174,7 +172,7 @@ namespace GameEngine
                 }
             }
 
-            _gameStatus = currentGameStatus;
+            GameStatus = currentGameStatus;
         }
         
         private List<(int, int)> GetNeighbours(int yIndex, int xIndex)
