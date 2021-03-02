@@ -4,11 +4,11 @@ using GameEngine;
 
 namespace ConsoleUI
 {
-    public class GameUI
+    public static class GameUI
     {
-        private static readonly string _verticalSeparator = "|";
-        private static readonly string _horizontalSeparator = "-";
-        private static readonly string _centerSeparator = "+";
+        private static readonly string VerticalSeparator = "|";
+        private static readonly string HorizontalSeparator = "-";
+        private static readonly string CenterSeparator = "+";
         
         public static void PrintBoard(Game game)
         {
@@ -20,34 +20,37 @@ namespace ConsoleUI
                     if (yIndex == -1 && xIndex == -1)
                     {
                         line = "   ";
-                    } else if (yIndex == -1)
+                    }
+                    else if (yIndex == -1 && xIndex.ToString().Length == 2)
                     {
-                        if (xIndex.ToString().Length == 2)
-                        {
-                            line = line + " " + xIndex + "";
-                        }
-                        else
-                        {
-                            line = line + " " + xIndex + " ";
-                        }
-                    } else if (xIndex == -1)
+                        line = line + " " + xIndex + "";
+                    }
+                    else if (yIndex == -1)
                     {
-                        if (yIndex.ToString().Length == 2)
-                        {
-                            line = line + " " + yIndex + "";
-                        }
-                        else
-                        {
-                            line = line + " " + yIndex + " ";
-                        }
+                        line = line + " " + xIndex + " ";
                     }
                     else
                     {
-                        line = line + " " + PrintCellState(game, yIndex, xIndex) + " ";
+                        if (xIndex == -1)
+                        {
+                            if (yIndex.ToString().Length == 2)
+                            {
+                                line = line + " " + yIndex + "";
+                            }
+                            else
+                            {
+                                line = line + " " + yIndex + " ";
+                            }
+                        }
+                        else
+                        {
+                            line = line + " " + PrintCellState(game, yIndex, xIndex) + " ";
+                        }
                     }
+
                     if (xIndex < game.BoardWidth - 1)
                     {
-                        line = line + _verticalSeparator;
+                        line = line + VerticalSeparator;
                     }
                 }
                 
@@ -56,12 +59,12 @@ namespace ConsoleUI
                 if (yIndex < game.BoardHeight - 1)
                 {
                     line = "";
-                    for (int xIndex = 0; xIndex <= game.BoardWidth; xIndex++)
+                    for (var xIndex = 0; xIndex <= game.BoardWidth; xIndex++)
                     {
-                        line = line + _horizontalSeparator + _horizontalSeparator + _horizontalSeparator;
+                        line = line + HorizontalSeparator + HorizontalSeparator + HorizontalSeparator;
                         if (xIndex <= game.BoardWidth - 1)
                         {
-                            line = line + _centerSeparator;
+                            line = line + CenterSeparator;
                         }
                     }
                     Console.WriteLine(line);

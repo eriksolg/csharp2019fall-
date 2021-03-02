@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
 
 namespace GameEngine
@@ -19,11 +18,13 @@ namespace GameEngine
             switch (difficulty)
             {
                 case Difficulty.Easy:
-                    BoardHeight = BoardWidth = 8;
+                    BoardHeight = 8;
+                    BoardWidth = 8;
                     _numberOfMines = 10;
                     break;
                 case Difficulty.Medium:
-                    BoardHeight = BoardWidth = 16;
+                    BoardHeight = 16;
+                    BoardWidth = 16;
                     _numberOfMines = 40;
                     break;
                 case Difficulty.Hard:
@@ -37,7 +38,7 @@ namespace GameEngine
             GameStatus = GameStatus.NotStarted;
         }
 
-        public void HandleFirstMove(int firstMoveY, int firstMoveX)
+        private void HandleFirstMove(int firstMoveY, int firstMoveX)
         {
             GameStatus = GameStatus.InProgress;
             InitializeBoard(firstMoveY, firstMoveX);
@@ -102,8 +103,9 @@ namespace GameEngine
         {
             if (GameStatus == GameStatus.NotStarted)
             {
-                InitializeBoard(yIndex, xIndex);
+                HandleFirstMove(yIndex, xIndex);
             }
+            
             Cell cell = Board[yIndex, xIndex];
             cell.IsOpened = true;
 
@@ -122,9 +124,9 @@ namespace GameEngine
 
         public void OpenAllCells()
         {
-            for (int y = 0; y < BoardHeight; y++)
+            for (var y = 0; y < BoardHeight; y++)
             {
-                for (int x = 0; x < BoardWidth; x++)
+                for (var x = 0; x < BoardWidth; x++)
                 {
                     OpenCell(y, x);
                 }

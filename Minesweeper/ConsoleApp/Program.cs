@@ -21,19 +21,19 @@ namespace ConsoleApp
                     {"1", new MenuItem()
                         {
                             Title = "Easy",
-                            CommandToExecute = () => GameLoop(Difficulty.Easy)
+                            CommandToExecute = () => Play(Difficulty.Easy)
                         }
                     },
                     {"2", new MenuItem()
                         {
                             Title = "Medium",
-                            CommandToExecute = () => GameLoop(Difficulty.Medium) 
+                            CommandToExecute = () => Play(Difficulty.Medium) 
                         }
                     },
                     {"3", new MenuItem()
                         {
                             Title = "Hard",
-                            CommandToExecute = () => GameLoop(Difficulty.Hard) 
+                            CommandToExecute = () => Play(Difficulty.Hard) 
                         }
                     }
                 }
@@ -56,9 +56,8 @@ namespace ConsoleApp
             Menu0.Run();
         }
 
-        private static string GameLoop(Difficulty difficulty)
+        private static string Play(Difficulty difficulty)
         {
-            
             var ActionMenu = new Menu()
             {
                 Title = "Action",
@@ -67,19 +66,20 @@ namespace ConsoleApp
                     {"1", new MenuItem()
                         {
                             Title = "Open",
-                            CommandToExecute = () => "1"
+                            CommandToExecute = () => UserAction.Open.ToString()
                         }
                     },
                     {"2", new MenuItem()
                         {
                             Title = "Mark/Unmark",
-                            CommandToExecute = () => "2"
+                            CommandToExecute = () => UserAction.Mark.ToString()
                         }
                     }
                 }
             };
             
             var game = new Game(difficulty);
+            
             do
             {
                 Console.Clear();
@@ -87,11 +87,13 @@ namespace ConsoleApp
                 var userXInt = -1;
                 var userYInt = -1;
                 var userActionInt = -1;
+                
                 do
                 {
                     Console.WriteLine("Give me Y value!");
                     Console.Write(">");
                     var userY = Console.ReadLine();
+                    
                     if (!int.TryParse(userY, out userYInt))
                     {
                         Console.WriteLine($"{userY} is not a number");
