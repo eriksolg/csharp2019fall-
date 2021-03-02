@@ -22,10 +22,24 @@ namespace ConsoleUI
                         line = "   ";
                     } else if (yIndex == -1)
                     {
-                        line = line + " " + xIndex + " ";
+                        if (xIndex.ToString().Length == 2)
+                        {
+                            line = line + " " + xIndex + "";
+                        }
+                        else
+                        {
+                            line = line + " " + xIndex + " ";
+                        }
                     } else if (xIndex == -1)
                     {
-                        line = line + " " + yIndex + " ";
+                        if (yIndex.ToString().Length == 2)
+                        {
+                            line = line + " " + yIndex + "";
+                        }
+                        else
+                        {
+                            line = line + " " + yIndex + " ";
+                        }
                     }
                     else
                     {
