@@ -14,19 +14,15 @@ namespace GameEngine
 
         private bool _playerZeroMove;
 
-        public Game() : this(3, 3)
+        public Game(GameSettings settings)
         {
-        }
-        
-        public Game(int boardHeight, int boardWidth)
-        {
-            if (boardHeight < 3 || boardHeight < 3)
+            if (settings.BoardWidth < 3 || settings.BoardHeight < 3)
             {
                 throw new ArgumentException("Board size has to be at least 3x3!");
             }
-            BoardHeight = boardHeight;
-            BoardWidth = boardWidth;
-            Board = new CellState[boardHeight, boardWidth];
+            BoardHeight = settings.BoardHeight;;
+            BoardWidth = settings.BoardWidth;;
+            Board = new CellState[BoardHeight, BoardWidth];
         }
 
         public CellState[,] GetBoard()
