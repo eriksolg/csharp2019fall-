@@ -16,7 +16,7 @@ namespace GameEngine
             writer.Write(jsonString);
         }
 
-        public static GameSettings LoadConfig(string fileName)
+        public static GameSettings? LoadConfig(string fileName)
         {
             if (!System.IO.File.Exists($"{fileName}_savegame.json"))
                 return null;

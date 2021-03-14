@@ -6,7 +6,7 @@ namespace GameEngine
 {
     public class Game
     {
-        private Cell[][] Board { get; }
+        private Cell[][]? Board { get; }
 
         private readonly int _numberOfMines;
         public int BoardWidth { get; }
@@ -66,6 +66,9 @@ namespace GameEngine
             {
                 for (var x = 0; x < BoardWidth; x++)
                 {
+                    if (Board == null)
+                        continue;
+                    
                     Board[y][x] = new Cell();
                     if (mineLocations.Contains((y, x)))
                     {
@@ -99,7 +102,8 @@ namespace GameEngine
         public Cell[][] GetBoard()
         {
             var result = new Cell[BoardHeight][];
-            Array.Copy(Board, result, Board.Length);
+            if (Board != null)
+                Array.Copy(Board, result, Board.Length);
             return result;
         }
         
@@ -109,22 +113,25 @@ namespace GameEngine
 
             foreach (var (item1, item2) in GetNeighbours(yIndex, xIndex))
             {
-                numberOfBombsNearby += Board[item1][item2].HasBomb ? 1 : 0;
+                numberOfBombsNearby += Board != null && Board[item1][item2].HasBomb ? 1 : 0;
             }
             return numberOfBombsNearby;
         }
 
         public void OpenCell(int yIndex, int xIndex)
         {
-            Cell cell = Board[yIndex][xIndex];
-            cell.IsOpened = true;
+            if (Board != null)
+            {
+                Cell cell = Board[yIndex][xIndex];
+                cell.IsOpened = true;
+            }
 
             if (GetNumberOfBombsNearCell(yIndex, xIndex) != 0)
                 return;
             
             foreach (var (item1, item2) in GetNeighbours(yIndex, xIndex))
             {
-                if (Board[item1][item2].IsOpened)
+                if (Board != null && Board[item1][item2].IsOpened)
                 {
                     continue;
                 }
@@ -149,9 +156,12 @@ namespace GameEngine
             {
                 InitializeBoard(yIndex, xIndex);
             }
-            
-            var cell = Board[yIndex][xIndex];
-            cell.IsMarked = !cell.IsMarked;
+
+            if (Board != null)
+            {
+                var cell = Board[yIndex][xIndex];
+                cell.IsMarked = !cell.IsMarked;
+            }
         }
 
         public void UpdateGameStatus()
@@ -169,6 +179,8 @@ namespace GameEngine
             {
                 for (var x = 0; x < BoardWidth; x++)
                 {
+                    if (Board == null) continue;
+                    
                     Cell cell = Board[y][x];
                     if (cell.HasBomb && cell.IsOpened)
                     {
@@ -176,7 +188,7 @@ namespace GameEngine
                     }
                     
                     if ((cell.HasBomb && !cell.IsMarked ||
-                        !cell.HasBomb && !cell.IsOpened ) &&
+                         !cell.HasBomb && !cell.IsOpened ) &&
                         currentGameStatus != GameStatus.Lost)
                     {
                         currentGameStatus = GameStatus.InProgress;
