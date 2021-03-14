@@ -6,15 +6,24 @@ namespace GameEngine
 {
     public class Game
     {
-        private Cell[,] Board { get; }
+        private Cell[][] Board { get; }
 
         private readonly int _numberOfMines;
         public int BoardWidth { get; }
         public int BoardHeight { get; }
         public GameStatus GameStatus { get; private set; }
 
-        public Game(Difficulty difficulty = Difficulty.Easy)
+        public Game(Difficulty difficulty, GameSettings settings)
         {
+            if (settings != null)
+            {
+                Board = settings.Board;
+                BoardHeight = settings.BoardHeight;
+                BoardWidth = settings.BoardWidth;
+                GameStatus = settings.GameStatus;
+                return;
+            }
+            
             switch (difficulty)
             {
                 case Difficulty.Easy:
@@ -32,13 +41,19 @@ namespace GameEngine
                     BoardHeight = 30;
                     _numberOfMines = 99;
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(difficulty), difficulty, null);
             }
 
-            Board = new Cell[BoardHeight, BoardWidth];
+            Board = new Cell[BoardHeight][];
+            for (var i = 0; i < Board.Length; i++)
+            {
+                Board[i] = new Cell[BoardWidth];
+            }
             GameStatus = GameStatus.NotStarted;
         }
 
-        private void HandleFirstMove(int firstMoveY, int firstMoveX)
+        public void HandleFirstMove(int firstMoveY, int firstMoveX)
         {
             GameStatus = GameStatus.InProgress;
             InitializeBoard(firstMoveY, firstMoveX);
@@ -46,79 +61,74 @@ namespace GameEngine
 
         private void InitializeBoard(int firstMoveY, int firstMoveX)
         {
-            
             var mineLocations = GenerateMineLocations();
             for (var y = 0; y < BoardHeight; y++)
             {
                 for (var x = 0; x < BoardWidth; x++)
                 {
-                    Board[y, x] = new Cell();
+                    Board[y][x] = new Cell();
                     if (mineLocations.Contains((y, x)))
                     {
-                        Board[y, x].HasBomb = true;
+                        Board[y][x].HasBomb = true;
                     }
                 }
             }
 
             (int, int)[] GenerateMineLocations()
             {
-                Random rnd = new Random();
-                (int, int)[] mineLocations = new (int, int)[_numberOfMines];
+                var rnd = new Random();
+                var generatedMineLocations = new (int, int)[_numberOfMines];
                 for (var i = 0; i < _numberOfMines; i++)
                 {
                     (int, int) generatedLocation;
                     do
                     {
-                        int generatedNumber = rnd.Next(0, BoardHeight * BoardWidth - 1);
-                        int x = generatedNumber % BoardWidth;
-                        int y = (generatedNumber - x) / BoardWidth;
+                        var generatedNumber = rnd.Next(0, BoardHeight * BoardWidth - 1);
+                        var x = generatedNumber % BoardWidth;
+                        var y = (generatedNumber - x) / BoardWidth;
                         generatedLocation = (y, x);
                     } while (generatedLocation == (firstMoveY, firstMoveX));
                     
-                    mineLocations[i] = generatedLocation;
+                    generatedMineLocations[i] = generatedLocation;
                 }
 
-                return mineLocations;
+                return generatedMineLocations;
             }
         }
         
-        public Cell[,] GetBoard()
+        public Cell[][] GetBoard()
         {
-            var result = new Cell[BoardHeight, BoardWidth];
+            var result = new Cell[BoardHeight][];
             Array.Copy(Board, result, Board.Length);
             return result;
         }
         
         public int GetNumberOfBombsNearCell(int yIndex, int xIndex) {
+
             var numberOfBombsNearby = 0;
 
-            foreach ((int, int) neighbor in GetNeighbours(yIndex, xIndex))
+            foreach (var (item1, item2) in GetNeighbours(yIndex, xIndex))
             {
-                numberOfBombsNearby += Board[neighbor.Item1, neighbor.Item2].HasBomb ? 1 : 0;
+                numberOfBombsNearby += Board[item1][item2].HasBomb ? 1 : 0;
             }
             return numberOfBombsNearby;
         }
 
         public void OpenCell(int yIndex, int xIndex)
         {
-            if (GameStatus == GameStatus.NotStarted)
-            {
-                HandleFirstMove(yIndex, xIndex);
-            }
-            
-            Cell cell = Board[yIndex, xIndex];
+            Cell cell = Board[yIndex][xIndex];
             cell.IsOpened = true;
 
-            if (GetNumberOfBombsNearCell( yIndex, xIndex) == 0)
+            if (GetNumberOfBombsNearCell(yIndex, xIndex) != 0)
+                return;
+            
+            foreach (var (item1, item2) in GetNeighbours(yIndex, xIndex))
             {
-                foreach ((int, int) neighbor in GetNeighbours(yIndex, xIndex))
+                if (Board[item1][item2].IsOpened)
                 {
-                    if (Board[neighbor.Item1, neighbor.Item2].IsOpened)
-                    {
-                        continue;
-                    }
-                    OpenCell(neighbor.Item1, neighbor.Item2);
+                    continue;
                 }
+                OpenCell(item1, item2);
             }
         }
 
@@ -140,7 +150,7 @@ namespace GameEngine
                 InitializeBoard(yIndex, xIndex);
             }
             
-            Cell cell = Board[yIndex, xIndex];
+            var cell = Board[yIndex][xIndex];
             cell.IsMarked = !cell.IsMarked;
         }
 
@@ -159,7 +169,7 @@ namespace GameEngine
             {
                 for (var x = 0; x < BoardWidth; x++)
                 {
-                    Cell cell = Board[y, x];
+                    Cell cell = Board[y][x];
                     if (cell.HasBomb && cell.IsOpened)
                     {
                         currentGameStatus = GameStatus.Lost;
@@ -179,7 +189,7 @@ namespace GameEngine
         
         private List<(int, int)> GetNeighbours(int yIndex, int xIndex)
         {
-            List<(int, int)> result = new List<(int, int)>();
+            var result = new List<(int, int)>();
             var yMin = yIndex - 1 < 0 ? yIndex : yIndex - 1;
             var yMax = yIndex + 1 >= BoardHeight ? yIndex : yIndex + 1;
             var xMin = xIndex - 1 < 0 ? xIndex : xIndex - 1;

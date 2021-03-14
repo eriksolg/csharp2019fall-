@@ -2,7 +2,8 @@ namespace GameEngine
 {
     public enum UserAction
     {
-        Open,
-        Mark
+        Open = 1,
+        Mark = 2,
+        None = 3
     }
 }

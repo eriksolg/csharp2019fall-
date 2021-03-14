@@ -37,6 +37,11 @@ namespace MenuSystem
             }
         }
 
+        public void addMenuItem(string menuCommand, MenuItem menuItem)
+        {
+            _menuItemsDictionary.Add(menuCommand, menuItem);
+        }
+
         public MenuItem MenuItemExit { get; set; } = new MenuItem() {Title = "Exit"};
         public MenuItem MenuItemReturnToPrevious { get; set; } = new MenuItem() {Title = "Return to Previous menu"};
         public MenuItem MenuItemReturnToMain { get; set; } = new MenuItem() {Title = "Return to Main Menu"};
@@ -67,7 +72,6 @@ namespace MenuSystem
                     if (menuItem.CommandToExecute != null)
                     {
                         returnCommand = menuItem.CommandToExecute();
-                        break;
                     }
                 }
 

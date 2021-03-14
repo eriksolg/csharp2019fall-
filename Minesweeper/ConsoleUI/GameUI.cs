@@ -50,7 +50,7 @@ namespace ConsoleUI
 
                     if (xIndex < game.BoardWidth - 1)
                     {
-                        line = line + VerticalSeparator;
+                        line += VerticalSeparator;
                     }
                 }
                 
@@ -81,7 +81,7 @@ namespace ConsoleUI
             }
             
             var board = game.GetBoard();
-            var cell = board[yIndex, xIndex];
+            var cell = board[yIndex][xIndex];
             
             if (!cell.IsOpened)
             {

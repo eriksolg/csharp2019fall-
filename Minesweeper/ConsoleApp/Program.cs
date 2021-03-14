@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using ConsoleUI;
 using GameEngine;
 using MenuSystem;
 
 namespace ConsoleApp
 {
-    class Program
+    static class Program
     {
+        private static GameSettings _settings { get; set; }
         static void Main(string[] args)
         {
             Console.WriteLine("Minesweeper");
 
-            var MenuStartGame = new Menu()
+            var menuStartGame = new Menu(1)
             {
                 Title = "Select Difficulty",
                 MenuItemsDictionary = new Dictionary<string, MenuItem>()
@@ -38,27 +38,41 @@ namespace ConsoleApp
                     }
                 }
             };
-            
-            var Menu0 = new Menu()
+
+            var menu0 = new Menu(0)
             {
                 Title = "Minesweeper Main Menu",
                 MenuItemsDictionary = new Dictionary<string, MenuItem>()
                 { 
                     {"S", new MenuItem()
                         {
-                            Title = "Start game",
-                            CommandToExecute = MenuStartGame.Run 
+                            Title = "Start a new game",
+                            CommandToExecute = menuStartGame.Run 
                         }
-                    }
+                    },
+                    {"L", new MenuItem()
+                        {
+                            Title = "Load saved game",
+                            CommandToExecute = () =>
+                            {
+                                LoadSavedGame();
+                                return "M";
+                            }
+                        }
+                    },
                 }
             };
-
-            Menu0.Run();
+            
+            menu0.Run();
         }
-
-        private static string Play(Difficulty difficulty)
+        
+        private static string Play(Difficulty difficulty = Difficulty.Easy)
         {
-            var ActionMenu = new Menu()
+            Console.WriteLine(_settings);
+            var game = new Game(difficulty, _settings);
+            UserAction userAction;
+            
+            var actionMenu = new Menu(0)
             {
                 Title = "Action",
                 MenuItemsDictionary = new Dictionary<string, MenuItem>()
@@ -66,76 +80,58 @@ namespace ConsoleApp
                     {"1", new MenuItem()
                         {
                             Title = "Open",
-                            CommandToExecute = () => UserAction.Open.ToString()
+                            CommandToExecute = () =>
+                            {
+                                userAction = UserAction.Open;
+                                return "X";
+                            }
                         }
                     },
                     {"2", new MenuItem()
                         {
                             Title = "Mark/Unmark",
-                            CommandToExecute = () => UserAction.Mark.ToString()
+                            CommandToExecute = () =>
+                            { 
+                                userAction = UserAction.Mark;
+                                return "X";
+                            }
+                        }
+                    },
+                    {"S", new MenuItem()
+                        {
+                            Title = "Save game",
+                            CommandToExecute = () =>
+                            {
+                                SaveGame(game);
+                                return "";
+                            }
                         }
                     }
                 }
             };
-            
-            var game = new Game(difficulty);
-            
+
             do
             {
                 Console.Clear();
                 GameUI.PrintBoard(game);
-                var userXInt = -1;
-                var userYInt = -1;
-                var userActionInt = -1;
                 
-                do
-                {
-                    Console.WriteLine("Give me Y value!");
-                    Console.Write(">");
-                    var userY = Console.ReadLine();
-                    
-                    if (!int.TryParse(userY, out userYInt))
-                    {
-                        Console.WriteLine($"{userY} is not a number");
-                        userYInt = -1;
-                    }
-                    if (userYInt >= game.BoardHeight)
-                    {
-                        Console.WriteLine("Y coordinate out of board bounds!");
-                    }
-                } while (userYInt < 0 || userYInt >= game.BoardHeight);
-                
-                do
-                {
-                    Console.WriteLine("Give me X value!");
-                    Console.Write(">");
-                    var userX = Console.ReadLine();
-                    if (!int.TryParse(userX, out userXInt))
-                    {
-                        Console.WriteLine($"{userX} is not a number");
-                        userXInt = -1;
-                    }
-                    if (userXInt >= game.BoardWidth)
-                    {
-                        Console.WriteLine("X coordinate out of board bounds!");
-                    }
-                } while (userXInt < 0 || userXInt >= game.BoardWidth);
-                
-                do
-                {
-                    var userAction = ActionMenu.Run();
-                    if (!int.TryParse(userAction, out userActionInt))
-                    {
-                        Console.WriteLine($"{userAction} is not a number");
-                    }
-                } while (userActionInt < 0);
+                var userYInt = GetUserIntInput("Please enter Y value!", 0, game.BoardHeight - 1);
+                var userXInt = GetUserIntInput("Please enter X value!", 0, game.BoardWidth - 1);
 
-                switch (userActionInt)
+                userAction = UserAction.None;
+                actionMenu.Run();
+                
+                if (game.GameStatus == GameStatus.NotStarted)
                 {
-                    case 1:
+                    game.HandleFirstMove(userYInt, userXInt);
+                }
+                
+                switch (userAction)
+                {
+                    case UserAction.Open:
                         game.OpenCell(userYInt, userXInt);
                         break;
-                    case 2:
+                    case UserAction.Mark:
                         game.MarkCell(userYInt, userXInt);
                         break;
                 }
@@ -158,7 +154,137 @@ namespace ConsoleApp
                     break;
             }
 
+            _settings = null;
+
             return "X";
+        }
+        private static int GetUserIntInput(string prompt, int min, int max)
+        {
+            do
+            {
+                Console.WriteLine(prompt);
+
+                Console.Write(">");
+                var consoleLine = Console.ReadLine();
+                
+                if (int.TryParse(consoleLine, out var userInt))
+                {
+                    if (userInt >= min && userInt <= max)
+                        return userInt;
+                    
+                    Console.WriteLine($"{userInt} is not within the bounds!");
+                    continue;
+                }
+
+                Console.WriteLine($"'{consoleLine}' cant be converted to int value!");
+            } while (true);
+        }
+
+        private static void SaveGame(Game game)
+        {
+            if (game.GameStatus == GameStatus.NotStarted)
+            {
+                Console.WriteLine("Please make the first move before saving!");
+                return;
+            }
+            var saveActionMenu = new Menu()
+            {
+                Title = "Save Game",
+                MenuItemsDictionary = new Dictionary<string, MenuItem>()
+                { 
+                    {"1", new MenuItem()
+                        {
+                            Title = "Save to a new file",
+                            CommandToExecute = () => SaveToFile(false)
+                        }
+                    },
+                    {"2", new MenuItem()
+                        {
+                            Title = "Overwrite and existing save file",
+                            CommandToExecute = () => SaveToFile(true)
+                        }
+                    }
+                }
+            };
+
+            String SaveToFile(Boolean overrideExistingFile)
+            {
+                var settings = new GameSettings
+                {
+                    Board = game.GetBoard(),
+                    BoardHeight = game.BoardHeight,
+                    BoardWidth = game.BoardWidth,
+                    GameStatus = game.GameStatus
+                };
+
+                var saveFileSelectMenu = new Menu();
+
+                if (overrideExistingFile)
+                {
+                    var savedGames = GameConfigHandler.GetSavedGames();
+
+                    if (savedGames.Length == 0)
+                    {
+                        Console.WriteLine("No saved games found!");
+                        return "";
+                    }
+                    
+                    for (var i = 0; i < savedGames.Length; i++)
+                    {
+                        var existingFileName = savedGames[i];
+                        saveFileSelectMenu.addMenuItem($"{i}", new MenuItem(){
+                            Title = savedGames[i],
+                            CommandToExecute = () =>
+                            {
+                                GameConfigHandler.SaveConfig(settings, existingFileName);
+                                return "X";
+                            }
+                        });
+                    }
+
+                    return saveFileSelectMenu.Run();
+                }
+                
+                Console.WriteLine("Please enter the filename!");
+
+                Console.Write(">");
+                
+                var newFileName = Console.ReadLine();
+                
+                GameConfigHandler.SaveConfig(settings, newFileName);
+                return "X";
+
+            }
+
+            saveActionMenu.Run();
+        }
+        private static void LoadSavedGame()
+        {
+            var loadGameMenu = new Menu(1);
+
+            var savedGames = GameConfigHandler.GetSavedGames();
+
+            if (savedGames.Length == 0)
+            {
+                Console.WriteLine("No saved games found!");
+                return;
+            }
+
+            for (var i = 0; i < savedGames.Length; i++)
+            {
+                var fileName = savedGames[i];
+                loadGameMenu.addMenuItem($"{i}", new MenuItem(){
+                    Title = savedGames[i],
+                    CommandToExecute = () =>
+                    {
+                        _settings = GameConfigHandler.LoadConfig(fileName);
+                        return "X";
+                    }
+                });
+            }
+
+            loadGameMenu.Run();
+            Play();
         }
     }
 }
