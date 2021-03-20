@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Domain;
 
 namespace GameEngine
 {
@@ -13,14 +14,14 @@ namespace GameEngine
         public int BoardHeight { get; }
         public GameStatus GameStatus { get; private set; }
 
-        public Game(Difficulty difficulty, GameSettings settings)
+        public Game(Difficulty difficulty, SavedGame? savedGame)
         {
-            if (settings != null)
+            if (savedGame != null)
             {
-                Board = settings.Board;
-                BoardHeight = settings.BoardHeight;
-                BoardWidth = settings.BoardWidth;
-                GameStatus = settings.GameStatus;
+                Board = savedGame.Board;
+                BoardHeight = savedGame.BoardHeight;
+                BoardWidth = savedGame.BoardWidth;
+                GameStatus = savedGame.GameStatus;
                 return;
             }
             

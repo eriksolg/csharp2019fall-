@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using ConsoleUI;
+using Domain;
 using GameEngine;
 using MenuSystem;
 
@@ -8,7 +10,7 @@ namespace ConsoleApp
 {
     static class Program
     {
-        private static GameSettings _settings { get; set; }
+        private static SavedGame? _savedGame { get; set; }
         static void Main(string[] args)
         {
             Console.WriteLine("Minesweeper");
@@ -68,8 +70,7 @@ namespace ConsoleApp
         
         private static string Play(Difficulty difficulty = Difficulty.Easy)
         {
-            Console.WriteLine(_settings);
-            var game = new Game(difficulty, _settings);
+            var game = new Game(difficulty, _savedGame);
             UserAction userAction;
             
             var actionMenu = new Menu(0)
@@ -154,7 +155,7 @@ namespace ConsoleApp
                     break;
             }
 
-            _settings = null;
+            _savedGame = null;
 
             return "X";
         }
@@ -194,64 +195,60 @@ namespace ConsoleApp
                 { 
                     {"1", new MenuItem()
                         {
-                            Title = "Save to a new file",
-                            CommandToExecute = () => SaveToFile(false)
+                            Title = "Save a new game",
+                            CommandToExecute = () => SaveGame(false)
                         }
                     },
                     {"2", new MenuItem()
                         {
-                            Title = "Overwrite and existing save file",
-                            CommandToExecute = () => SaveToFile(true)
+                            Title = "Overwrite an existing saved game",
+                            CommandToExecute = () => SaveGame(true)
                         }
                     }
                 }
             };
 
-            String SaveToFile(Boolean overrideExistingFile)
+            String SaveGame(Boolean overrideExistingSave)
             {
-                var settings = new GameSettings
+                var savedGame = new SavedGame()
                 {
+                    DateTime = new DateTime(),
                     Board = game.GetBoard(),
                     BoardHeight = game.BoardHeight,
                     BoardWidth = game.BoardWidth,
                     GameStatus = game.GameStatus
                 };
 
-                var saveFileSelectMenu = new Menu();
+                var saveGameSelectMenu = new Menu();
 
-                if (overrideExistingFile)
+                if (overrideExistingSave)
                 {
-                    var savedGames = GameConfigHandler.GetSavedGames();
+                    var savedGames = SavedGameHandler.GetSavedGames();
 
-                    if (savedGames.Length == 0)
+                    if (!savedGames.Any())
                     {
                         Console.WriteLine("No saved games found!");
                         return "";
                     }
-                    
-                    for (var i = 0; i < savedGames.Length; i++)
+
+                    var i = 1;
+                    foreach (var existingSavedGame in savedGames)
                     {
-                        var existingFileName = savedGames[i];
-                        saveFileSelectMenu.addMenuItem($"{i}", new MenuItem(){
-                            Title = savedGames[i],
+                        saveGameSelectMenu.addMenuItem(i.ToString(), new MenuItem(){
+                            Title = existingSavedGame.DateTime.ToString(),
                             CommandToExecute = () =>
                             {
-                                GameConfigHandler.SaveConfig(settings, existingFileName);
+                                SavedGameHandler.SaveGame(savedGame, existingSavedGame);
                                 return "X";
                             }
                         });
+                        i++;
                     }
 
-                    return saveFileSelectMenu.Run();
+                    return saveGameSelectMenu.Run();
                 }
-                
-                Console.WriteLine("Please enter the filename!");
 
-                Console.Write(">");
-                
-                var newFileName = Console.ReadLine();
-                
-                GameConfigHandler.SaveConfig(settings, newFileName);
+                SavedGameHandler.SaveGame(savedGame);
                 return "X";
 
             }
@@ -262,25 +259,26 @@ namespace ConsoleApp
         {
             var loadGameMenu = new Menu(1);
 
-            var savedGames = GameConfigHandler.GetSavedGames();
+            var savedGames = SavedGameHandler.GetSavedGames();
 
-            if (savedGames.Length == 0)
+            if (!savedGames.Any())
             {
                 Console.WriteLine("No saved games found!");
                 return;
             }
 
-            for (var i = 0; i < savedGames.Length; i++)
+            var i = 1;
+            foreach (var existingSavedGame in savedGames)
             {
-                var fileName = savedGames[i];
-                loadGameMenu.addMenuItem($"{i}", new MenuItem(){
-                    Title = savedGames[i],
+                loadGameMenu.addMenuItem(i.ToString(), new MenuItem(){
+                    Title = existingSavedGame.DateTime.ToString(),
                     CommandToExecute = () =>
                     {
-                        _settings = GameConfigHandler.LoadConfig(fileName);
+                        _savedGame = existingSavedGame;
                         return "X";
                     }
                 });
+                i++;
             }
 
             loadGameMenu.Run();

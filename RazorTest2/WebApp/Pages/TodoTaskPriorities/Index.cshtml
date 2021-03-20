@@ -1,0 +1,42 @@
+@page
+@model WebApp.Pages.TodoTaskPriorities.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.TodoTaskPriority[0].TodoTaskPriorityName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TodoTaskPriority[0].Sort)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.TodoTaskPriority) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.TodoTaskPriorityName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Sort)
+            </td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.TodoTaskPriorityId">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.TodoTaskPriorityId">Details</a> |
+                <a asp-page="./Delete" asp-route-id="@item.TodoTaskPriorityId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

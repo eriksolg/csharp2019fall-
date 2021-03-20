@@ -1,0 +1,54 @@
+@page
+@model WebApp.Pages.TodoTasks.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.TodoTask[0].TodoTaskName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TodoTask[0].IsDone)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TodoTask[0].TodoTaskPriority)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TodoTask[0].TodoTaskCategory)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.TodoTask) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.TodoTaskName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsDone)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TodoTaskPriority.TodoTaskPriorityName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TodoTaskCategory.TodoTaskCategoryName)
+            </td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.TodoTaskId">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.TodoTaskId">Details</a> |
+                <a asp-page="./Delete" asp-route-id="@item.TodoTaskId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

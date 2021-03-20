@@ -11,5 +11,10 @@ namespace Domain
         [Required] public string ContactTypeValue { get; set; } = default!;
 
         public ICollection<Contact>? Contacts { get; set; }
+
+        public override string ToString()
+        {
+            return $"{ContactTypeId} - {ContactTypeValue} - Contacts: {(Contacts == null ? "null" : Contacts.Count)}";
+        }
     }
 }

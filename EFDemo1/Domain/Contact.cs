@@ -13,5 +13,10 @@ namespace Domain
 
         public int ContactTypeId { get; set; }
         public ContactType ContactType { get; set; } = default!;
+
+        public override string ToString()
+        {
+            return $"{ContactId} - {ContactValue}";
+        }
     }
 }
