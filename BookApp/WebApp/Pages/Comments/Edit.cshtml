@@ -1,0 +1,41 @@
+@page
+@model WebApp.Pages.Comments.EditModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Comment</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Comment.CommentId" />
+            <input type="hidden" asp-for="Comment.BookId" />
+            <div class="form-group">
+                <label asp-for="Comment.CommentBody" class="control-label"></label>
+                <input asp-for="Comment.CommentBody" class="form-control" />
+                <span asp-validation-for="Comment.CommentBody" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Comment.CommentAuthor" class="control-label"></label>
+                <input asp-for="Comment.CommentAuthor" class="form-control" />
+                <span asp-validation-for="Comment.CommentAuthor" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index" asp-route-book="@Model.Comment.BookId">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

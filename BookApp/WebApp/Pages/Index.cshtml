@@ -1,0 +1,33 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Fancy Bookstore</h1>
+    <table>
+        <thead>
+        <th>Item</th>
+        <th>Number of</th>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Authors</td>
+            <td>@Model.AuthorsCount</td>
+        </tr>
+        <tr>
+            <td>Publishers</td>
+            <td>@Model.PublishersCount</td>
+        </tr>
+        <tr>
+            <td>Books</td>
+            <td>@Model.BooksCount</td>
+        </tr>
+        <tr>
+            <td>Comments</td>
+            <td>@Model.CommentsCount</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
