@@ -44,14 +44,7 @@ namespace WebApp.Pages
             game.UpdateGameStatus();
             HttpContext.Session.SetString("Game", JsonConvert.SerializeObject(game));
         }
-        
-        public void OnPostOpenAllCells()
-        {
-            game = JsonConvert.DeserializeObject<GameEngine.Game>(HttpContext.Session.GetString("Game"));
-            game.OpenAllCells();
-            HttpContext.Session.SetString("Game", JsonConvert.SerializeObject(game));
-        }
-        
+
         public void OnPostClearGame()
         {
             HttpContext.Session.Remove("Game");
@@ -77,16 +70,15 @@ namespace WebApp.Pages
             return new JsonResult(board);
         }
         
-        public JsonResult OnGetNumberOfBombsNearCell(int y, int x)
-        {
-            game = JsonConvert.DeserializeObject<GameEngine.Game>(HttpContext.Session.GetString("Game"));
-            var bombs = game.GetNumberOfBombsNearCell(y, x);
-            return new JsonResult(bombs);
-        }
             
         public JsonResult OnGetGameStatus()
         {
             game = JsonConvert.DeserializeObject<GameEngine.Game>(HttpContext.Session.GetString("Game"));
+            if (game.GameStatus == GameStatus.Lost || game.GameStatus == GameStatus.Won)
+            {
+                game.OpenAllCells();
+                HttpContext.Session.SetString("Game", JsonConvert.SerializeObject(game));
+            }
             return new JsonResult(game.GameStatus);
         }
     }

@@ -56,19 +56,7 @@
             case 3:
                 gameStatusInfo.textContent = "WON";
                 break;
-        
         }
-        
-        if (gameStatus === 2 || gameStatus === 3) {
-            await fetch(`?handler=OpenAllCells`, {
-                method: 'POST',
-                headers: {
-                   'Content-Type': 'application/json',
-                   RequestVerificationToken: $('input:hidden[name="__RequestVerificationToken"]').val()
-                }
-            });
-        }
-            
         
         await fetch('?handler=Board', {
             method: 'GET',
