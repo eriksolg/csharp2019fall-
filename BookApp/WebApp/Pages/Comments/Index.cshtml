@@ -10,8 +10,10 @@
 <p>
     <a asp-page="Create" asp-route-book="@Model.BookId">Create New</a>
 </p>
-<table class="table">
-    <thead>
+@if (Model.Comment.Count > 0)
+{
+    <table class="table">
+        <thead>
         <tr>
             <th>
                 @Html.DisplayNameFor(model => model.Comment[0].CommentBody)
@@ -24,25 +26,27 @@
             </th>
             <th></th>
         </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model.Comment) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.CommentBody)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CommentAuthor)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Book.Title)
-            </td>
-            <td>
-                <a asp-page="./Edit" asp-route-id="@item.CommentId">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.CommentId">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.CommentId">Delete</a>
-            </td>
-        </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model.Comment)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CommentBody)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CommentAuthor)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Book.Title)
+                </td>
+                <td>
+                    <a asp-page="./Edit" asp-route-id="@item.CommentId">Edit</a> |
+                    <a asp-page="./Details" asp-route-id="@item.CommentId">Details</a> |
+                    <a asp-page="./Delete" asp-route-id="@item.CommentId">Delete</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
 }
-    </tbody>
-</table>

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using DAL;
 using Domain;
+using WebApp.DTO;
 
 namespace WebApp.Pages.Books
 {
@@ -19,36 +20,44 @@ namespace WebApp.Pages.Books
             _context = context;
         }
 
-        public IList<Book> Book { get;set; }
+        public IList<BookIndexDto> Book { get;set; }
         
         [FromQuery(Name = "search")]
         public string SearchString { get; set; }
-
+        [FromQuery(Name = "reset")]
+        public string Reset { get; set; }
         public async Task OnGetAsync()
         {
+            if (Reset == "Reset")
+            {
+                SearchString = null;
+            }
+
+            var bookQuery = _context.Books
+                .Include(b => b.Author)
+                .Include(b => b.Publisher)
+                .Select(a => new BookIndexDto()
+                {
+                    Book = a,
+                    CommentCount = a.Comments.Count,
+                    LastComment = ""
+                })
+                .AsQueryable();
+            
             if (!string.IsNullOrEmpty(SearchString))
             {
-                var matchedAuthors = await _context.Authors
-                    .Where(a => a.FirstName.Contains(SearchString)).Select(a => a.AuthorId).ToListAsync();
-                var matchedPublishers = await _context.Publishers
-                    .Where(p => p.PublisherName.Contains(SearchString)).Select(p => p.PublisherId).ToListAsync();
-                var matchedBooks = await _context.Books
-                    .Where(b => b.Title.Contains(SearchString)).Select(b => b.BookId).ToListAsync();
+                var searchString = SearchString.ToLower().Trim();
+                bookQuery = bookQuery
+                    .Where(b => b.Book.Author.FirstName.ToLower().Contains(searchString) ||
+                                b.Book.Author.LastName.ToLower().Contains(searchString) ||
+                                b.Book.Publisher.PublisherName.ToLower().Contains(searchString) ||
+                                b.Book.Title.ToLower().Contains(searchString));
+            }
 
-                Book = await _context.Books
-                    .Where(b => matchedAuthors.Contains(b.AuthorId) ||
-                                matchedPublishers.Contains(b.PublisherId) ||
-                                matchedBooks.Contains(b.BookId))
-                    .Include(b => b.Author)
-                    .Include(b => b.Publisher).ToListAsync();
-            }
-            else
-            {
-                Book = await _context.Books
-                    .Include(b => b.Author)
-                    .Include(b => b.Publisher).ToListAsync();
-            }
-            
+            bookQuery = bookQuery.OrderBy(b => b.Book.Title);
+
+            Book = await bookQuery.ToListAsync();
+
         }
     }
 }

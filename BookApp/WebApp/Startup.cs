@@ -25,7 +25,8 @@ namespace WebApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<AppDbContext>(options => options.UseSqlite("Data Source=appdb.db"));
+            //services.AddDbContext<AppDbContext>(options => options.UseSqlite("Data Source=appdb.db"));
+            services.AddDbContext<AppDbContext>(options => options.UseMySql("Server=homeserver;Database=bookapp;User=bookapp;Password=Bookapp$123", new MySqlServerVersion(new Version(8, 0, 21))));
             services.AddRazorPages();
         }
 

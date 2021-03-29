@@ -1,20 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using Domain;
 
 namespace GameEngine
 {
     public class Game
     {
-        private Cell[][]? Board { get; }
+        public Cell[][]? Board { get; set; }
+        public int _numberOfMines { get; set; }
+        public int BoardWidth { get; set; }
+        public int BoardHeight { get; set; }
+        public GameStatus GameStatus { get; set; }
 
-        private readonly int _numberOfMines;
-        public int BoardWidth { get; }
-        public int BoardHeight { get; }
-        public GameStatus GameStatus { get; private set; }
+        public Game()
+        {
+            
+        }
 
-        public Game(Difficulty difficulty, SavedGame? savedGame)
+        public Game(Difficulty difficulty, SavedGame? savedGame = null)
         {
             if (savedGame != null)
             {
@@ -121,6 +126,12 @@ namespace GameEngine
 
         public void OpenCell(int yIndex, int xIndex)
         {
+            
+            if (GameStatus == GameStatus.NotStarted)
+            {
+                HandleFirstMove(yIndex, xIndex);
+            }
+            
             if (Board != null)
             {
                 Cell cell = Board[yIndex][xIndex];
@@ -153,9 +164,10 @@ namespace GameEngine
 
         public void MarkCell(int yIndex, int xIndex)
         {
+            
             if (GameStatus == GameStatus.NotStarted)
             {
-                InitializeBoard(yIndex, xIndex);
+                HandleFirstMove(yIndex, xIndex);
             }
 
             if (Board != null)

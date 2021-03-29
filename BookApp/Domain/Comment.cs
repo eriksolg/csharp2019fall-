@@ -8,6 +8,6 @@ namespace Domain
         [Required] public string CommentBody { get; set; } = default!;
         [Required] public string CommentAuthor { get; set; } = default!;
         public int BookId { get; set; }
-        public Book? Book { get; set; } = default!;
+        public Book? Book { get; set; }
     }
 }

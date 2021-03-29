@@ -121,12 +121,7 @@ namespace ConsoleApp
 
                 userAction = UserAction.None;
                 actionMenu.Run();
-                
-                if (game.GameStatus == GameStatus.NotStarted)
-                {
-                    game.HandleFirstMove(userYInt, userXInt);
-                }
-                
+
                 switch (userAction)
                 {
                     case UserAction.Open:

@@ -1,0 +1,201 @@
+@page
+@using Domain
+@using Microsoft.AspNetCore.Http
+@model WebApp.Pages.Game
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "__AjaxAntiForgeryForm" }))
+{
+    @Html.AntiForgeryToken()
+}
+
+@if (HttpContext.Session.GetString("Game") == null)
+{
+    <h1>Please select a difficulty</h1>
+    <a class="btn btn-primary btn-lg btn-block" asp-route-difficulty="easy" asp-page="./Game">Easy</a>
+    <a class="btn btn-primary btn-lg btn-block" asp-route-difficulty="medium" asp-page="./Game">Medium</a>
+    <a class="btn btn-primary btn-lg btn-block" asp-route-difficulty="hard" asp-page="./Game">Hard</a>
+} else
+{
+    <div id="board-container">
+        
+    </div>
+    <div id="game-status-container">
+        <span>Game Status: </span>
+        <span id="game-status"></span>
+    </div>
+
+    <script>
+    
+    let boardContainer = document.getElementById('board-container');
+    let gameStatusInfo = document.getElementById('game-status');
+
+    const refreshState = async () => {
+        
+        let board = null;
+        let gameStatus = null;
+        
+        await fetch('?handler=GameStatus', {
+            method: 'GET',
+            headers: {
+               'Content-Type': 'application/json'
+            }
+        }).then(response => response.json())
+        .then(value => {
+            gameStatus = value;
+        });
+        
+        switch (gameStatus) {
+            case 0:
+                gameStatusInfo.textContent = "Not Started";
+                break;
+            case 1:
+                gameStatusInfo.textContent = "In Progress";
+                break;
+            case 2:
+                gameStatusInfo.textContent = "LOST";
+                break;
+            case 3:
+                gameStatusInfo.textContent = "WON";
+                break;
+        
+        }
+        
+        if (gameStatus === 2 || gameStatus === 3) {
+            await fetch(`?handler=OpenAllCells`, {
+                method: 'POST',
+                headers: {
+                   'Content-Type': 'application/json',
+                   RequestVerificationToken: $('input:hidden[name="__RequestVerificationToken"]').val()
+                }
+            });
+        }
+            
+        
+        await fetch('?handler=Board', {
+            method: 'GET',
+            headers: {
+               'Content-Type': 'application/json'
+            }
+        }).then(response => response.json())
+        .then(boardJson => {
+            board = boardJson;
+        });
+        
+        let boardHeight = board.length;
+        let boardWidth = board[0].length;
+                
+        boardContainer.removeChild(boardContainer.firstChild);
+        
+        let gameBoard = document.createElement('div');
+        gameBoard.id = 'game-board';
+        gameBoard.style.gridTemplateColumns = `repeat(${boardWidth}, max-content)`;
+        
+        for (let yIndex = 0; yIndex < boardHeight; yIndex++) {
+            for (let xIndex = 0; xIndex < boardWidth; xIndex++) {
+                let cell = document.createElement('div');
+                cell.classList.add('cell');
+                
+                if (board[yIndex][xIndex] != null) {
+                    
+                    if (board[yIndex][xIndex].isOpened) {
+                        if (board[yIndex][xIndex].hasBomb) {
+                            cell.classList.add('cell-bomb');
+                        } else {
+                            cell.classList.add('cell-empty');
+                            
+                            let numberOfBombsNearCell = 0;
+                            await fetch(`?handler=NumberOfBombsNearCell&x=${xIndex}&y=${yIndex}`, {
+                                method: 'GET',
+                                headers: {
+                                   'Content-Type': 'application/json',
+                                   RequestVerificationToken: $('input:hidden[name="__RequestVerificationToken"]').val()
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(value => {
+                                numberOfBombsNearCell = value;
+                            });
+                            
+                            if (numberOfBombsNearCell > 0)
+                                cell.textContent = numberOfBombsNearCell;
+                            
+                        }
+                    } else {
+                          let flagButton = document.createElement('button');
+                          flagButton.classList.add('flag-button');
+                          flagButton.addEventListener('click', async (event) => {
+                              event.stopPropagation();
+                              await fetch(`?handler=HandleMove&x=${xIndex}&y=${yIndex}&flagging=true`, {
+                                  method: 'POST',
+                                  headers: {
+                                     'Content-Type': 'application/json',
+                                     RequestVerificationToken: $('input:hidden[name="__RequestVerificationToken"]').val()
+                                  }
+                              });
+                              refreshState();
+                          });
+                          
+                          cell.appendChild(flagButton);  
+                        
+                        if (board[yIndex][xIndex].isMarked) {
+                            cell.classList.add('cell-marked');
+                        } else {   
+                            cell.classList.add('cell-unopened');
+                        }
+                    }
+                    
+
+                    
+                } else {
+                    cell.classList.add('cell-unopened');
+                }
+
+                    cell.addEventListener('click', async () => {
+                       if (board[yIndex][xIndex] != null)
+                           if (board[yIndex][xIndex].isOpened === true)
+                               return
+                               
+                       await fetch(`?handler=HandleMove&x=${xIndex}&y=${yIndex}`, {
+                           method: 'POST',
+                           headers: {
+                              'Content-Type': 'application/json',
+                              RequestVerificationToken: $('input:hidden[name="__RequestVerificationToken"]').val()
+                           }
+                       });
+                       
+                       refreshState();
+                    });
+                
+                
+                switch (boardHeight) {
+                    case 8:
+                        cell.classList.add('cell-big');
+                        break;
+                    case 16:
+                        cell.classList.add('cell-small');
+                        break;
+                    default:
+                        cell.classList.add('cell-small');
+                }
+                
+                gameBoard.appendChild(cell);
+        
+            }
+        }
+        boardContainer.appendChild(gameBoard);
+        
+        if (gameStatus === 2 || gameStatus === 3) {
+            await fetch(`?handler=ClearGame`, {
+                method: 'POST',
+                headers: {
+                   'Content-Type': 'application/json',
+                   RequestVerificationToken: $('input:hidden[name="__RequestVerificationToken"]').val()
+                }
+            });
+        }
+    }
+    
+    refreshState();
+    
+
+    </script> 
+}

@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DAL.Migrations
@@ -11,13 +12,13 @@ namespace DAL.Migrations
                 name: "SavedGames",
                 columns: table => new
                 {
-                    SavedGameId = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    DateTime = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    BoardData = table.Column<string>(type: "TEXT", nullable: true),
-                    BoardWidth = table.Column<int>(type: "INTEGER", nullable: false),
-                    BoardHeight = table.Column<int>(type: "INTEGER", nullable: false),
-                    GameStatus = table.Column<int>(type: "INTEGER", nullable: false)
+                    SavedGameId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    DateTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    BoardData = table.Column<string>(type: "longtext CHARACTER SET utf8mb4", nullable: false),
+                    BoardWidth = table.Column<int>(type: "int", nullable: false),
+                    BoardHeight = table.Column<int>(type: "int", nullable: false),
+                    GameStatus = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {

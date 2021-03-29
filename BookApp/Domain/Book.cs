@@ -8,9 +8,11 @@ namespace Domain
     public class Book
     {
         public int BookId { get; set; }
-        [Required] public string Title { get; set; } = default!;
+        
+        public string Title { get; set; } = default!;
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime ReleaseDate { get; set; }
-
         public int AuthorId { get; set; }
         public Author? Author { get; set; }
         public int PublisherId { get; set; }

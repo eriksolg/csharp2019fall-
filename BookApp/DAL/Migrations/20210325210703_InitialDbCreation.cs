@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DAL.Migrations
@@ -11,12 +12,12 @@ namespace DAL.Migrations
                 name: "Authors",
                 columns: table => new
                 {
-                    AuthorId = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    FirstName = table.Column<string>(type: "TEXT", nullable: false),
-                    LastName = table.Column<string>(type: "TEXT", nullable: true),
-                    Birth = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    Death = table.Column<DateTime>(type: "TEXT", nullable: true)
+                    AuthorId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    FirstName = table.Column<string>(type: "varchar(128) CHARACTER SET utf8mb4", maxLength: 128, nullable: false),
+                    LastName = table.Column<string>(type: "varchar(128) CHARACTER SET utf8mb4", maxLength: 128, nullable: true),
+                    Birth = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    Death = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -27,9 +28,9 @@ namespace DAL.Migrations
                 name: "Publishers",
                 columns: table => new
                 {
-                    PublisherId = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    PublisherName = table.Column<string>(type: "TEXT", nullable: false)
+                    PublisherId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    PublisherName = table.Column<string>(type: "longtext CHARACTER SET utf8mb4", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -40,12 +41,12 @@ namespace DAL.Migrations
                 name: "Books",
                 columns: table => new
                 {
-                    BookId = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Title = table.Column<string>(type: "TEXT", nullable: false),
-                    ReleaseDate = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    AuthorId = table.Column<int>(type: "INTEGER", nullable: false),
-                    PublisherId = table.Column<int>(type: "INTEGER", nullable: false)
+                    BookId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Title = table.Column<string>(type: "longtext CHARACTER SET utf8mb4", nullable: false),
+                    ReleaseDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    AuthorId = table.Column<int>(type: "int", nullable: false),
+                    PublisherId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -68,11 +69,11 @@ namespace DAL.Migrations
                 name: "Comments",
                 columns: table => new
                 {
-                    CommentId = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    CommentBody = table.Column<string>(type: "TEXT", nullable: false),
-                    CommentAuthor = table.Column<string>(type: "TEXT", nullable: false),
-                    BookId = table.Column<int>(type: "INTEGER", nullable: false)
+                    CommentId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    CommentBody = table.Column<string>(type: "longtext CHARACTER SET utf8mb4", nullable: false),
+                    CommentAuthor = table.Column<string>(type: "longtext CHARACTER SET utf8mb4", nullable: false),
+                    BookId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {

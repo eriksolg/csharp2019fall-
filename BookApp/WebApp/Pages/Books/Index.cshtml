@@ -1,4 +1,5 @@
 @page
+@using Microsoft.CodeAnalysis.Differencing
 @model WebApp.Pages.Books.IndexModel
 
 @{
@@ -14,48 +15,37 @@
     <form method="get">
         <input asp-for="SearchString" name="search" class="form-control"/>
         <input type="submit" value="Search" class="btn btn-primary"/>
+        <input type="submit" value="Reset" name="reset" class="btn btn-secondary" @(string.IsNullOrWhiteSpace(Model.SearchString) ? "disabled=\"disabled\"" : "")/>
     </form>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Book[0].Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Book[0].ReleaseDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Book[0].Author)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Book[0].Publisher)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model.Book) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ReleaseDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Author.FirstName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Publisher.PublisherName)
-            </td>
-            <td>
-                <a asp-page="./Edit" asp-route-id="@item.BookId">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.BookId">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.BookId">Delete</a>
-                <a asp-page="/Comments/Index" asp-route-book="@item.BookId">Comments</a>
-            </td>
-        </tr>
+
+@if (!string.IsNullOrWhiteSpace(Model.SearchString))
+{
+    <p>Search is active. Search term: @Model.SearchString</p>
 }
-    </tbody>
-</table>
+<p>Records: @Model.Book.Count</p>
+@if (Model.Book.Count > 0)
+{
+    @foreach (var item in Model.Book)
+    {
+        <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+            <div class="card">
+                <div class="card-header">
+                    @Html.DisplayFor(modelItem => item.Book.Title)
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Comments: @item.CommentCount<br/>
+                        Release date: @Html.DisplayFor(modelItem => item.Book.ReleaseDate)<br/>
+                        Author: @Html.DisplayFor(modelItem => item.Book.Author.FirstLastName)<br/>
+                        Publisher: @Html.DisplayFor(modelItem => item.Book.Publisher.PublisherName)<br/>
+                    </p>
+                        <a asp-page="./Edit" asp-route-id="@item.Book.BookId">Edit</a> |
+                        <a asp-page="./Details" asp-route-id="@item.Book.BookId">Details</a> |
+                        <a asp-page="./Delete" asp-route-id="@item.Book.BookId">Delete</a>
+                        <a asp-page="/Comments/Index" asp-route-book="@item.Book.BookId">Comments</a>
+                </div>
+            </div>
+        </div>
+    }
+}

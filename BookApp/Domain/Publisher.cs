@@ -7,7 +7,7 @@ namespace Domain
     public class Publisher
     {
         public int PublisherId { get; set; }
-        [Required] public string PublisherName { get; set; } = default!;
+        public string PublisherName { get; set; } = default!;
         public ICollection<Book>? Books { get; set; }
     }
 }

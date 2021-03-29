@@ -8,10 +8,19 @@ namespace DAL
     {
         public DbSet<SavedGame> SavedGames { get; set; } = default!;
         
+        public AppDbContext(DbContextOptions options) : base(options)
+        {
+        }
+
+        public AppDbContext()
+        {
+            
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder
-                .UseSqlite(@"Data Source=/home/erik/Documents/Git/csharp2019fall/Minesweeper/ConsoleApp/app.db");
+                .UseMySql("Server=homeserver;Database=minesweeper;User=minesweeper;Password=Minesweeper$123", new MySqlServerVersion(new Version(8, 0, 21)));;
         }
     }
 }
