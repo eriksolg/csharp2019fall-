@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json.Serialization;
 
 namespace Domain
 {
@@ -20,6 +21,8 @@ namespace Domain
         public bool IsOpened { get; set; }
 
         public bool IsMarked { get; set; }
+
+        public int NumberOfBombsNearby { get; set; }
 
         public Cell()
         {

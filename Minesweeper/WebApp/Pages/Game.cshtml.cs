@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json.Serialization;
+using Domain;
 using GameEngine;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -60,6 +61,19 @@ namespace WebApp.Pages
         {
             game = JsonConvert.DeserializeObject<GameEngine.Game>(HttpContext.Session.GetString("Game"));
             var board = game.GetBoard();
+            if (game.GameStatus != GameStatus.NotStarted)
+            {
+                for (var yIndex = 0; yIndex < board.Length; yIndex++)
+                {
+                    for (var xIndex = 0; xIndex < board[0].Length; xIndex++)
+                    {
+                        var bombs = game.GetNumberOfBombsNearCell(yIndex, xIndex);
+                        board[yIndex][xIndex].NumberOfBombsNearby = bombs;
+                    }
+                }
+            }
+            
+
             return new JsonResult(board);
         }
         

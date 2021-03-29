@@ -80,6 +80,8 @@
             board = boardJson;
         });
         
+        console.log(board)
+        
         let boardHeight = board.length;
         let boardWidth = board[0].length;
                 
@@ -102,22 +104,9 @@
                         } else {
                             cell.classList.add('cell-empty');
                             
-                            let numberOfBombsNearCell = 0;
-                            await fetch(`?handler=NumberOfBombsNearCell&x=${xIndex}&y=${yIndex}`, {
-                                method: 'GET',
-                                headers: {
-                                   'Content-Type': 'application/json',
-                                   RequestVerificationToken: $('input:hidden[name="__RequestVerificationToken"]').val()
-                                }
-                            })
-                            .then(response => response.json())
-                            .then(value => {
-                                numberOfBombsNearCell = value;
-                            });
-                            
+                            let numberOfBombsNearCell = board[yIndex][xIndex].numberOfBombsNearby;       
                             if (numberOfBombsNearCell > 0)
-                                cell.textContent = numberOfBombsNearCell;
-                            
+                                cell.textContent = numberOfBombsNearCell;        
                         }
                     } else {
                           let flagButton = document.createElement('button');
