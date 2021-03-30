@@ -94,7 +94,7 @@ namespace ConsoleUI
                 return "B";
             }
 
-            var numberOfBombsNearby = game.GetNumberOfBombsNearCell(yIndex, xIndex);
+            var numberOfBombsNearby = cell.NumberOfBombsNearby;
             
             return numberOfBombsNearby != 0 ? numberOfBombsNearby.ToString() : " ";
         }

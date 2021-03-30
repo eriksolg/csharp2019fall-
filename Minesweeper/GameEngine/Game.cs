@@ -110,6 +110,19 @@ namespace GameEngine
             var result = new Cell[BoardHeight][];
             if (Board != null)
                 Array.Copy(Board, result, Board.Length);
+
+            if (GameStatus != GameStatus.NotStarted)
+            {
+                for (var yIndex = 0; yIndex < result.Length; yIndex++)
+                {
+                    for (var xIndex = 0; xIndex < result[0].Length; xIndex++)
+                    {
+                        var bombs = GetNumberOfBombsNearCell(yIndex, xIndex);
+                        result[yIndex][xIndex].NumberOfBombsNearby = bombs;
+                    }
+                }
+            }
+
             return result;
         }
         

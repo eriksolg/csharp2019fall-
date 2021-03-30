@@ -1,0 +1,22 @@
+@page
+@model WebApp.Pages.SaveGame
+
+@if (@Model.GameIsOnGoing())
+{
+    var SavedGames = @Model.GetSavedGames();
+    <a class="btn btn-primary btn-lg btn-block"asp-page="./SaveGame" asp-page-handler="SaveGame">Create a new savegame</a>
+    @if (SavedGames.Any())
+    {
+        <h2 style="margin-top: 20px">Or choose from list to override</h2>
+        var i = 1;
+        foreach (var existingSavedGame in SavedGames)
+        {
+            <a class="btn btn-secondary btn-lg btn-block save-game" asp-page="./SaveGame" asp-page-handler="SaveGame" asp-route-id="@existingSavedGame.SavedGameId">@i - @existingSavedGame.DateTime.ToString()</a>
+            i++;
+        }
+    }
+}
+else
+{
+    <h2>Please start a game first!</h2>
+}

@@ -16,8 +16,16 @@ namespace GameEngine
             return ctx.SavedGames;
         }
 
-        public static void SaveGame(SavedGame savedGame, SavedGame existingSavedGame = null!)
+        public static void SaveGame(Game game, SavedGame existingSavedGame = null!)
         {
+            var savedGame = new SavedGame()
+            {
+                DateTime = DateTime.Now,
+                Board = game.GetBoard(),
+                BoardHeight = game.BoardHeight,
+                BoardWidth = game.BoardWidth,
+                GameStatus = game.GameStatus
+            };
             using var ctx = new AppDbContext();
             
             if (existingSavedGame != null)

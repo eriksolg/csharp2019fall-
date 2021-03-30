@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Domain;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace WebApp.Pages
 {
@@ -17,15 +19,17 @@ namespace WebApp.Pages
         {
             _logger = logger;
         }
+        
+        public void OnGet() {}
 
         public bool GameIsOnGoing()
         {
-            return HttpContext.Session.GetString("Game") != null;
+            if (HttpContext.Session.GetString("Game") == null)
+                return false;
+            
+            var game = JsonConvert.DeserializeObject<GameEngine.Game>(HttpContext.Session.GetString("Game"));
+            return game.GameStatus == GameStatus.InProgress;
         }
         
-        public void OnGet()
-        {
-            
-        }
     }
 }

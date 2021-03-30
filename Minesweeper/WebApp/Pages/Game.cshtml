@@ -1,5 +1,4 @@
 @page
-@using Domain
 @using Microsoft.AspNetCore.Http
 @model WebApp.Pages.Game
 @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "__AjaxAntiForgeryForm" }))
@@ -19,10 +18,9 @@
         <span>Game Status: </span>
         <span id="game-status"></span>
     </div>
-    <div id="board-container">
-        
-    </div>
-
+    <div id="board-container"></div>
+    
+    
     <script>
     
     let boardContainer = document.getElementById('board-container');
@@ -30,19 +28,9 @@
 
     const refreshState = async () => {
         
-        let board = null;
-        let gameStatus = null;
-        
-        await fetch('?handler=GameStatus', {
-            method: 'GET',
-            headers: {
-               'Content-Type': 'application/json'
-            }
-        }).then(response => response.json())
-        .then(value => {
-            gameStatus = value;
-        });
-        
+        let board = await getBoard();
+        let gameStatus = await getGameStatus();
+
         switch (gameStatus) {
             case 0:
                 gameStatusInfo.textContent = "Not Started";
@@ -58,39 +46,36 @@
                 break;
         }
         
-        await fetch('?handler=Board', {
-            method: 'GET',
-            headers: {
-               'Content-Type': 'application/json'
-            }
-        }).then(response => response.json())
-        .then(boardJson => {
-            board = boardJson;
-        });
-                
         let boardHeight = board.length;
         let boardWidth = board[0].length;
-                
-        boardContainer.removeChild(boardContainer.firstChild);
+        
+        if (boardContainer.children.length > 0)
+            boardContainer.removeChild(boardContainer.firstChild);
         
         let gameBoard = document.createElement('div');
         gameBoard.id = 'game-board';
         gameBoard.style.gridTemplateColumns = `repeat(${boardWidth}, max-content)`;
         
+        
         for (let yIndex = 0; yIndex < boardHeight; yIndex++) {
             for (let xIndex = 0; xIndex < boardWidth; xIndex++) {
+                
                 let cell = document.createElement('div');
+                let cellObject = board[yIndex][xIndex];
+                
                 cell.classList.add('cell');
                 
-                if (board[yIndex][xIndex] != null) {
-                    
-                    if (board[yIndex][xIndex].isOpened) {
-                        if (board[yIndex][xIndex].hasBomb) {
+                if (cellObject == null)
+                    cell.classList.add('cell-unopened');
+                else {
+                    if (cellObject.isOpened) {
+                        
+                        if (cellObject.hasBomb) {
                             cell.classList.add('cell-bomb');
                         } else {
                             cell.classList.add('cell-empty');
                             
-                            let numberOfBombsNearCell = board[yIndex][xIndex].numberOfBombsNearby;       
+                            let numberOfBombsNearCell = cellObject.numberOfBombsNearby;       
                             if (numberOfBombsNearCell > 0)
                                 cell.textContent = numberOfBombsNearCell;        
                         }
@@ -99,48 +84,35 @@
                           flagButton.classList.add('flag-button');
                           flagButton.addEventListener('click', async (event) => {
                               event.stopPropagation();
-                              await fetch(`?handler=HandleMove&x=${xIndex}&y=${yIndex}&flagging=true`, {
-                                  method: 'POST',
-                                  headers: {
-                                     'Content-Type': 'application/json',
-                                     RequestVerificationToken: $('input:hidden[name="__RequestVerificationToken"]').val()
-                                  }
-                              });
+                              await markCell(yIndex, xIndex);
                               refreshState();
                           });
-                          
                           cell.appendChild(flagButton);  
                         
-                        if (board[yIndex][xIndex].isMarked) {
+                        if (cellObject.isMarked) {
                             cell.classList.add('cell-marked');
                         } else {   
                             cell.classList.add('cell-unopened');
                         }
-                    }
-                    
-
-                    
-                } else {
-                    cell.classList.add('cell-unopened');
+                    }    
                 }
 
-                    cell.addEventListener('click', async () => {
-                       if (board[yIndex][xIndex] != null)
-                           if (board[yIndex][xIndex].isOpened === true)
-                               return
-                               
-                       await fetch(`?handler=HandleMove&x=${xIndex}&y=${yIndex}`, {
-                           method: 'POST',
-                           headers: {
-                              'Content-Type': 'application/json',
-                              RequestVerificationToken: $('input:hidden[name="__RequestVerificationToken"]').val()
-                           }
-                       });
-                       
-                       refreshState();
-                    });
-                
-                
+                cell.addEventListener('click', async () => {
+                   if (cellObject != null)
+                       if (cellObject.isOpened === true)
+                           return
+                           
+                   await fetch(`?handler=HandleMove&x=${xIndex}&y=${yIndex}`, {
+                       method: 'POST',
+                       headers: {
+                          'Content-Type': 'application/json',
+                          RequestVerificationToken: $('input:hidden[name="__RequestVerificationToken"]').val()
+                       }
+                   });
+                   
+                   refreshState();
+                });
+              
                 switch (boardHeight) {
                     case 8:
                         cell.classList.add('cell-big');
@@ -156,6 +128,7 @@
         
             }
         }
+        
         boardContainer.appendChild(gameBoard);
         
         if (gameStatus === 2 || gameStatus === 3) {
@@ -168,6 +141,38 @@
             });
         }
     }
+    
+    const getGameStatus = async () => {
+        return await fetch('?handler=GameStatus', {
+            method: 'GET',
+            headers: {
+               'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(value => value);
+    };
+    
+    const getBoard = async () => {
+        return await fetch('?handler=Board', {
+            method: 'GET',
+            headers: {
+               'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(boardJson => boardJson);
+    };
+    
+    const markCell = async (yIndex, xIndex) => {
+          await fetch(`?handler=HandleMove&x=${xIndex}&y=${yIndex}&flagging=true`, {
+              method: 'POST',
+              headers: {
+                 'Content-Type': 'application/json',
+                 RequestVerificationToken: $('input:hidden[name="__RequestVerificationToken"]').val()
+              }
+          });
+    };
     
     refreshState();
     

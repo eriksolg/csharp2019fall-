@@ -205,14 +205,6 @@ namespace ConsoleApp
 
             String SaveGame(Boolean overrideExistingSave)
             {
-                var savedGame = new SavedGame()
-                {
-                    DateTime = new DateTime(),
-                    Board = game.GetBoard(),
-                    BoardHeight = game.BoardHeight,
-                    BoardWidth = game.BoardWidth,
-                    GameStatus = game.GameStatus
-                };
 
                 var saveGameSelectMenu = new Menu();
 
@@ -233,7 +225,7 @@ namespace ConsoleApp
                             Title = existingSavedGame.DateTime.ToString(),
                             CommandToExecute = () =>
                             {
-                                SavedGameHandler.SaveGame(savedGame, existingSavedGame);
+                                SavedGameHandler.SaveGame(game, existingSavedGame);
                                 return "X";
                             }
                         });
@@ -243,7 +235,7 @@ namespace ConsoleApp
                     return saveGameSelectMenu.Run();
                 }
 
-                SavedGameHandler.SaveGame(savedGame);
+                SavedGameHandler.SaveGame(game);
                 return "X";
 
             }

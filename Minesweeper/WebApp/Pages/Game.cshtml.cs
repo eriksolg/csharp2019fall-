@@ -1,12 +1,10 @@
 using System;
-using System.Text.Json.Serialization;
 using Domain;
 using GameEngine;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace WebApp.Pages
 {
@@ -14,40 +12,42 @@ namespace WebApp.Pages
     {
         [FromQuery(Name = "difficulty")]
         public string DifficultyString { get; set; }
-
         [FromQuery(Name = "newGame")]
         public bool NewGame { get; set; }
-
-        public GameEngine.Game? game { get; set; }
-        
-        public IActionResult OnGet()
+        public void OnGet()
         {
-            if (NewGame == true)
+            if (NewGame)
                 ClearGame();
 
-            if (!string.IsNullOrWhiteSpace(DifficultyString))
-            {
-                Difficulty difficulty;
-                if (Enum.TryParse<Difficulty>(DifficultyString, true, out difficulty))
-                {
-                    Console.WriteLine("Starting game: " + difficulty);
-                    game = new GameEngine.Game(difficulty);
-                    SerializeGame(game);
-                }
-            }
+            if (string.IsNullOrWhiteSpace(DifficultyString))
+                return;
 
-            return null;
+            if (!Enum.TryParse<Difficulty>(DifficultyString, true, out var difficulty))
+                return;
+            
+            var game = new GameEngine.Game(difficulty);
+            
+            SerializeGame(game);
+
+            return;
         }
 
         public void OnPostHandleMove(int y, int x, bool flagging = false)
         {
-            game = DeSerializeGame();
+            var game = DeSerializeGame();
+            
             if (flagging)
                 game.MarkCell(y, x);
             else
                 game.OpenCell(y, x);
             
             game.UpdateGameStatus();
+            
+            if (game.GameStatus == GameStatus.Lost || game.GameStatus == GameStatus.Won)
+            {
+                game.OpenAllCells();
+            }
+            
             SerializeGame(game);
         }
 
@@ -56,49 +56,35 @@ namespace WebApp.Pages
             ClearGame();
         }
 
-        public void ClearGame()
-        {
-            HttpContext.Session.Remove("Game");
-        }
-        
         public JsonResult OnGetBoard()
         {
-            game = DeSerializeGame();
+            var game = DeSerializeGame();
             var board = game.GetBoard();
-            if (game.GameStatus != GameStatus.NotStarted)
-            {
-                for (var yIndex = 0; yIndex < board.Length; yIndex++)
-                {
-                    for (var xIndex = 0; xIndex < board[0].Length; xIndex++)
-                    {
-                        var bombs = game.GetNumberOfBombsNearCell(yIndex, xIndex);
-                        board[yIndex][xIndex].NumberOfBombsNearby = bombs;
-                    }
-                }
-            }
             
-
             return new JsonResult(board);
         }
         
             
         public JsonResult OnGetGameStatus()
         {
-            game = DeSerializeGame();
-            if (game.GameStatus == GameStatus.Lost || game.GameStatus == GameStatus.Won)
-            {
-                game.OpenAllCells();
-                HttpContext.Session.SetString("Game", JsonConvert.SerializeObject(game));
-            }
+            var game = DeSerializeGame();
+            
+
+            
             return new JsonResult(game.GameStatus);
         }
 
-        public GameEngine.Game DeSerializeGame()
+        private void ClearGame()
+        {
+            HttpContext.Session.Remove("Game");
+        }
+
+        private GameEngine.Game DeSerializeGame()
         {
             return JsonConvert.DeserializeObject<GameEngine.Game>(HttpContext.Session.GetString("Game"));
         }
 
-        public void SerializeGame(GameEngine.Game game)
+        private void SerializeGame(GameEngine.Game game)
         {
             HttpContext.Session.SetString("Game", JsonConvert.SerializeObject(game));
         }
