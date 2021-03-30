@@ -1,5 +1,8 @@
 ﻿@page
 @model IndexModel
-
-<a class="btn btn-primary btn-lg btn-block" asp-page="./Game">Start a new game</a>
+@if (@Model.GameIsOnGoing())
+{
+    <a class="btn btn-primary btn-lg btn-block" asp-page="./Game">Continue game</a>
+}
+<a class="btn btn-primary btn-lg btn-block" asp-page="./Game" asp-route-newGame="true">Start a new game</a>
 <a class="btn btn-primary btn-lg btn-block" asp-page="./LoadGame">Load and existing game</a>

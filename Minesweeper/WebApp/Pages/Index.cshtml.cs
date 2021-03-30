@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
@@ -17,6 +18,11 @@ namespace WebApp.Pages
             _logger = logger;
         }
 
+        public bool GameIsOnGoing()
+        {
+            return HttpContext.Session.GetString("Game") != null;
+        }
+        
         public void OnGet()
         {
             

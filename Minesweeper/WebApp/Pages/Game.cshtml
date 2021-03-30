@@ -15,12 +15,12 @@
     <a class="btn btn-primary btn-lg btn-block" asp-route-difficulty="hard" asp-page="./Game">Hard</a>
 } else
 {
-    <div id="board-container">
-        
-    </div>
     <div id="game-status-container">
         <span>Game Status: </span>
         <span id="game-status"></span>
+    </div>
+    <div id="board-container">
+        
     </div>
 
     <script>
@@ -67,9 +67,7 @@
         .then(boardJson => {
             board = boardJson;
         });
-        
-        console.log(board)
-        
+                
         let boardHeight = board.length;
         let boardWidth = board[0].length;
                 

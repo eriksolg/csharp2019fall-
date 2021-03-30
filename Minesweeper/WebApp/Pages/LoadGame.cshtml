@@ -1,3 +1,16 @@
 @page
 @model WebApp.Pages.LoadGame
 
+@if (Model.GetSavedGames() == false)
+{
+    <h1>No Saved Games Found</h1>
+}
+else
+{
+    var i = 1;
+    foreach (var existingSavedGame in @Model.SavedGames)
+    {
+        <a class="btn btn-secondary btn-lg btn-block" asp-page="./LoadGame" asp-page-handler="LoadGame" asp-route-id="@existingSavedGame.SavedGameId">@i - @existingSavedGame.DateTime.ToString()</a>
+        i++;
+    }
+}

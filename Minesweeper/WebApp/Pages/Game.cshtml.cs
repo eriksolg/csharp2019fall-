@@ -15,10 +15,16 @@ namespace WebApp.Pages
         [FromQuery(Name = "difficulty")]
         public string DifficultyString { get; set; }
 
+        [FromQuery(Name = "newGame")]
+        public bool NewGame { get; set; }
+
         public GameEngine.Game? game { get; set; }
         
         public IActionResult OnGet()
         {
+            if (NewGame == true)
+                ClearGame();
+
             if (!string.IsNullOrWhiteSpace(DifficultyString))
             {
                 Difficulty difficulty;
@@ -26,7 +32,7 @@ namespace WebApp.Pages
                 {
                     Console.WriteLine("Starting game: " + difficulty);
                     game = new GameEngine.Game(difficulty);
-                    HttpContext.Session.SetString("Game", JsonConvert.SerializeObject(game));
+                    SerializeGame(game);
                 }
             }
 
@@ -35,24 +41,29 @@ namespace WebApp.Pages
 
         public void OnPostHandleMove(int y, int x, bool flagging = false)
         {
-            game = JsonConvert.DeserializeObject<GameEngine.Game>(HttpContext.Session.GetString("Game"));
+            game = DeSerializeGame();
             if (flagging)
                 game.MarkCell(y, x);
             else
                 game.OpenCell(y, x);
             
             game.UpdateGameStatus();
-            HttpContext.Session.SetString("Game", JsonConvert.SerializeObject(game));
+            SerializeGame(game);
         }
 
         public void OnPostClearGame()
+        {
+            ClearGame();
+        }
+
+        public void ClearGame()
         {
             HttpContext.Session.Remove("Game");
         }
         
         public JsonResult OnGetBoard()
         {
-            game = JsonConvert.DeserializeObject<GameEngine.Game>(HttpContext.Session.GetString("Game"));
+            game = DeSerializeGame();
             var board = game.GetBoard();
             if (game.GameStatus != GameStatus.NotStarted)
             {
@@ -73,13 +84,23 @@ namespace WebApp.Pages
             
         public JsonResult OnGetGameStatus()
         {
-            game = JsonConvert.DeserializeObject<GameEngine.Game>(HttpContext.Session.GetString("Game"));
+            game = DeSerializeGame();
             if (game.GameStatus == GameStatus.Lost || game.GameStatus == GameStatus.Won)
             {
                 game.OpenAllCells();
                 HttpContext.Session.SetString("Game", JsonConvert.SerializeObject(game));
             }
             return new JsonResult(game.GameStatus);
+        }
+
+        public GameEngine.Game DeSerializeGame()
+        {
+            return JsonConvert.DeserializeObject<GameEngine.Game>(HttpContext.Session.GetString("Game"));
+        }
+
+        public void SerializeGame(GameEngine.Game game)
+        {
+            HttpContext.Session.SetString("Game", JsonConvert.SerializeObject(game));
         }
     }
 }
